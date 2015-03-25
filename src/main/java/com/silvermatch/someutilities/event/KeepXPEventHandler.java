@@ -16,18 +16,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 public class KeepXPEventHandler{
 	
 
-    /**
-     * Using the LivingDropsEvent. Note that this is from  net.minecraftforge.event, so to make this method be called, this class needs to be registered at MinecraftForge.EVENT_BUS.register(new AdvancedModEventHandler()).
-     * @param event
-     */
-    @SubscribeEvent
-    public void removePlayerXPDrops(LivingDropsEvent event){
-        if(event.entityLiving instanceof EntityPlayer) {
-            event.lootingLevel = 0;
-        }
-    }
-	
-	
   /**
   * Using the LivingDeathEvent. Note that this is from  net.minecraftforge.event, so to make this method be called, this class needs to be registered at MinecraftForge.EVENT_BUS.register(new SomeUtilitiesEventHandler()).
   * @param event
@@ -37,9 +25,8 @@ public class KeepXPEventHandler{
      if (!event.entityLiving.worldObj.isRemote)
      {
 		 if(event.entityLiving instanceof EntityPlayer) {
-	    	 Log.info("A player has died");
-	    	 EntityPlayer deadPlayer = (EntityPlayer) event.entityLiving;
-	    	 PlayerXP playerXP = new PlayerXP(deadPlayer.getUniqueID(), deadPlayer.experience, deadPlayer.experienceLevel, deadPlayer.experienceTotal);
+	    	EntityPlayer deadPlayer = (EntityPlayer) event.entityLiving;
+	    	PlayerXP playerXP = new PlayerXP(deadPlayer.getUniqueID(), deadPlayer.experience, deadPlayer.experienceLevel, deadPlayer.experienceTotal);
 	 		for(ModContainer mod : Loader.instance().getModList())
 	 		{
 	 			
@@ -50,6 +37,11 @@ public class KeepXPEventHandler{
 	 				 ((SomeUtilities) c).keepXP.addDeadPlayer(playerXP);
 	 			 }
 	 		}
+	 		
+	 		// Remove XP from player to avoid XP drop
+	 		deadPlayer.experience = 0F;
+	 		deadPlayer.experienceLevel = 0;
+	 		deadPlayer.experienceTotal = 0;
 		 }
     }
  }
@@ -59,19 +51,16 @@ public class KeepXPEventHandler{
      if (!event.world.isRemote)
      {
 		 if(event.entity instanceof EntityPlayer) {
-	    	 Log.info("A player has spawned");
-	    	 EntityPlayer respawnedPlayer = (EntityPlayer) event.entity;
+	    	EntityPlayer respawnedPlayer = (EntityPlayer) event.entity;
 	 		for(ModContainer mod : Loader.instance().getModList())
 	 		{
 	 			
 	 			 Object c = mod.getMod();
 	 			 if (c instanceof SomeUtilities)
 	 			 {
-	 				Log.info("Getting Player from dead list");
 	 				PlayerXP playerXP = ((SomeUtilities) c).keepXP.getDeadPlayer(respawnedPlayer.getUniqueID());
 	 				if (playerXP != null)
 	 				{
-	 					Log.info("Dead Player found");
 	 					respawnedPlayer.experience = playerXP.getExperience();
 	 					respawnedPlayer.experienceLevel = playerXP.getExperienceLevel();
 	 					respawnedPlayer.experienceTotal = playerXP.getExperienceTotal();
