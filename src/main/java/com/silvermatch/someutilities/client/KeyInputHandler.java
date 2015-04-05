@@ -19,12 +19,8 @@ public class KeyInputHandler{
         Keybindings key = getPressedKey();
         if(key != null) {
             switch(key){
-                case EXPLODE:
-                    NetworkHandler.sendToServer(new MessageExplode(3));
-                    break;
-                case EXPLODE_BIG:
-                    NetworkHandler.sendToServer(new MessageExplode(30));
-                    break;
+			default:
+				break;
             }
         }
     }
